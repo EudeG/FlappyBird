@@ -30,6 +30,7 @@
     Aquí definimos la versión de Java, la de LWJGL y la clase con main() por defecto.
   -->
   <properties>
+     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Versión de Java para compilar: el código fuente debe ser compatible con Java 17 -->
     <maven.compiler.source>17</maven.compiler.source>
     <!-- Versión del bytecode generado ( .class ); normalmente igual que source -->
@@ -42,7 +43,8 @@
       Puedes cambiar la clase desde la terminal sin tocar el POM:
         mvn exec:exec -DmainClass=com.graphics.OtraClase
     -->
-    <mainClass>com.graphics.App</mainClass>
+    <!-- este es el que levanta el proyecto, bueno la clase que va ocupar -->
+    <mainClass>com.graphics.AppFlappyBird</mainClass>
   </properties>
 
   <!--
@@ -91,6 +93,26 @@
       "classifier" indica qué variante descargar: natives-macos = Mac 64 bits Intel.
       Si no incluyes la variante correcta para tu máquina, verás errores como
       "Failed to locate library: liblwjgl.dylib" o "Platform/architecture mismatch". -->
+    <!-- Natives para Windows -->
+      <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl</artifactId>
+      <version>${lwjgl.version}</version>
+      <classifier>natives-windows</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-glfw</artifactId>
+      <version>${lwjgl.version}</version>
+      <classifier>natives-windows</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl-opengl</artifactId>
+      <version>${lwjgl.version}</version>
+      <classifier>natives-windows</classifier>
+    </dependency>
+    <!-- Natives para macOS -->
     <dependency>
       <groupId>org.lwjgl</groupId>
       <artifactId>lwjgl</artifactId>
@@ -174,7 +196,7 @@
           <executable>java</executable>
           <arguments>
             <!-- En macOS, GLFW exige que el hilo principal sea el primero; sin esto falla. -->
-            <argument>-XstartOnFirstThread</argument>
+            <!-- <argument>-XstartOnFirstThread</argument> --> solo para macOS; en Windows/Linux no hace falta y da problemas 
             <argument>-classpath</argument>
             <classpath/>
             <!-- La clase con main(); viene de la propiedad ${mainClass} (por defecto com.graphics.App) -->
