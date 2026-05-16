@@ -1,9 +1,4 @@
-com\graphics\App.class
-com\graphics\AppCamara.class
-com\graphics\AppFlappyBird$Tuberia.class
-com\graphics\AppLaberinto.class
-com\graphics\App3D.class
-com\graphics\AppMovimientoZoom.class
+com\graphics\Pipe.class
+com\graphics\Bird.class
 com\graphics\AppFlappyBird.class
-com\graphics\AppMovimientoTeclado.class
-com\graphics\AppZoom.class
+com\graphics\Renderer.class
