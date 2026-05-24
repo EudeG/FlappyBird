@@ -26,6 +26,9 @@ public class AppFlappyBird {
     private static final float GAP_MIN = -0.45f;
     private static final float GAP_MAX =  0.45f;
 
+    //limite de puntaje
+    private static final int PUNTOS_MAXIMOS =  3;
+
     // ── COMPONENTES ───────────────────────────────────────────────────
     private long     window;    // referencia a la ventana GLFW
     private Renderer renderer;  // maneja todo OpenGL
@@ -34,6 +37,8 @@ public class AppFlappyBird {
     private Bird bird1;
     // Jugador 2: rojo, un poco más a la derecha — salta con W
     private Bird bird2;
+    // Jugador 3: azul, un poco más a la derecha — salta con up
+    private Bird bird3;
 
     // Lista de tuberías activas en pantalla
     private final List<Pipe>  pipes  = new ArrayList<>();
@@ -50,6 +55,8 @@ public class AppFlappyBird {
     private boolean prevSpace;
     private boolean prevW;
     private boolean prevR;
+    private boolean prevUP;
+    
 
     // ── FLUJO PRINCIPAL ───────────────────────────────────────────────
 
@@ -95,6 +102,7 @@ public class AppFlappyBird {
         // Bird(x, r, g, b)
         bird1 = new Bird(-0.45f, 0.98f, 0.85f, 0.20f); // amarillo
         bird2 = new Bird(-0.30f, 0.95f, 0.20f, 0.20f); // rojo
+        bird3 = new Bird(-0.15f, 0.20f, 0.20f, 0.95f); // azul
     }
 
     /**
@@ -104,6 +112,7 @@ public class AppFlappyBird {
     private void resetGame() {
         bird1.reset();
         bird2.reset();
+        bird3.reset();
         pipes.clear();
         timerSpawn    = 0.0f;
         velocidadActual = VELOCIDAD_BASE;
@@ -151,6 +160,21 @@ public class AppFlappyBird {
         }
         prevW = wAhora;
 
+        // ── Jugador 3: flechita ──────────────────────────────────────────────
+        boolean upAhora = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_UP) == GLFW.GLFW_PRESS;
+        if (upAhora && !prevUP) {
+            if (gameOver) {
+                resetGame();
+                started = true;
+            }
+            if (bird3.vivo) {
+                started = true;
+                bird3.saltar();
+            }
+        }
+        prevUP = upAhora;
+
+
         // ── R: reiniciar (solo en game over) ──────────────────────────
         boolean rAhora = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_R) == GLFW.GLFW_PRESS;
         if (rAhora && !prevR && gameOver) {
@@ -166,9 +190,10 @@ public class AppFlappyBird {
         // Actualizar física de cada pájaro vivo
         if (bird1.vivo) bird1.actualizar(dt);
         if (bird2.vivo) bird2.actualizar(dt);
+        if (bird3.vivo) bird3.actualizar(dt);
 
         // Si ambos están muertos, game over
-        if (!bird1.vivo && !bird2.vivo) {
+        if (!bird1.vivo && !bird2.vivo && !bird3.vivo) {
             gameOver = true;
             actualizarTitulo();
             return;
@@ -177,7 +202,8 @@ public class AppFlappyBird {
         // ── Dificultad progresiva (requerimiento 3) ───────────────────
         // El puntaje más alto entre los dos jugadores define la velocidad.
         // Cada 5 puntos se suma 0.08 a la velocidad, hasta VELOCIDAD_MAX.
-        int mejorPuntaje = Math.max(bird1.puntaje, bird2.puntaje);
+        int mejorP1 = Math.max(bird1.puntaje, bird2.puntaje);
+        int mejorPuntaje = Math.max(mejorP1, bird3.puntaje);
         velocidadActual = Math.min(
             VELOCIDAD_BASE + (mejorPuntaje / 5) * 0.08f,
             VELOCIDAD_MAX
@@ -203,6 +229,7 @@ public class AppFlappyBird {
                 // Solo suma punto si el pájaro sigue vivo
                 if (bird1.vivo) bird1.puntaje++;
                 if (bird2.vivo) bird2.puntaje++;
+                if (bird3.vivo) bird3.puntaje++;
                 actualizarTitulo();
             }
 
@@ -213,6 +240,23 @@ public class AppFlappyBird {
             if (bird2.vivo && p.colisionaCon(bird2)) {
                 bird2.vivo = false;
             }
+            if (bird3.vivo && p.colisionaCon(bird3)) {
+                bird3.vivo = false;
+            }
+
+            // puntaje igual a muerte pero luego lo haremos volar al cielo y toque cielo termina juego 
+            // muerte al que llegue a limite de puntos
+            if (bird1.puntaje >=PUNTOS_MAXIMOS) {
+                if (bird1.vivo) bird1.actualizar(dt);
+                // bird1.vivo = false;
+                // actualizar a donde se va volando
+            }
+            if (bird2.puntaje >=PUNTOS_MAXIMOS) {
+                if (bird2.vivo) bird2.actualizar(dt);
+            }
+            if (bird3.puntaje >=PUNTOS_MAXIMOS) {
+                if (bird3.vivo) bird3.actualizar(dt);
+            }
 
             // Eliminar tuberías que ya salieron de pantalla
             if (p.fueraDePantalla()) {
@@ -220,8 +264,42 @@ public class AppFlappyBird {
             }
         }
 
+        // PUNTAJE MAXIMO LLEGA AL CIELO Y TERMINA
+        // Iterator<Pipe> ptmax = pipes.iterator();
+        // while (ptmax.hasNext()) {
+        //     // Pipe p = ptmax.next();
+        //     // p.actualizar(dt, velocidadActual);
+
+        //     // ¿El pájaro 1 pasó esta tubería?
+        //     if (!p.puntuada && p.x + Pipe.ANCHO * 0.5f < bird1.x) {
+        //         p.puntuada = true;
+        //         // Solo suma punto si el pájaro sigue vivo
+        //         if (bird1.vivo) bird1.puntaje++;
+        //         if (bird2.vivo) bird2.puntaje++;
+        //         if (bird3.vivo) bird3.puntaje++;
+        //         actualizarTitulo();
+        //     }
+
+        //     // muerte al que llegue a limite de puntos
+        //     if (bird1.puntaje >=5) {
+        //         bird1.vivo = false;
+        //     }
+        //     if (bird2.puntaje >=5) {
+        //         bird2.vivo = false;
+        //     }
+        //     if (bird3.puntaje >=5) {
+        //         bird3.vivo = false;
+        //     }
+
+        //     // // Eliminar tuberías que ya salieron de pantalla
+        //     // if (p.fueraDePantalla()) {
+        //     //     ptmax.remove();
+        //     // }
+        // }
+        
+
         // Verificar de nuevo si ambos murieron en este frame
-        if (!bird1.vivo && !bird2.vivo) {
+        if (!bird1.vivo && !bird2.vivo && !bird3.vivo) {
             gameOver = true;
             actualizarTitulo();
         }
@@ -255,6 +333,7 @@ public class AppFlappyBird {
         // ── Pájaros vivos ─────────────────────────────────────────────────
         if (bird1.vivo) bird1.dibujar(renderer);
         if (bird2.vivo) bird2.dibujar(renderer);
+        if (bird3.vivo) bird3.dibujar(renderer);
 
         // ── Pantalla de inicio ────────────────────────────────────────────
         // Se muestra antes de que empiece la partida
@@ -304,8 +383,10 @@ public class AppFlappyBird {
     private void actualizarTitulo() {
         String velocidad = String.format("%.2f", velocidadActual);
         String base = "J1(SPACE): " + bird1.puntaje
-                    + "  |  J2(W/flechita): " + bird2.puntaje
-                    + "  |  Vel: " + velocidad;
+                    + "  |  J2(W): " + bird2.puntaje
+                    + "  |  J3(UP): " + bird3.puntaje
+                    + "  |  Vel: " + velocidad
+                    ;
         if (!started) {
             GLFW.glfwSetWindowTitle(window, base + "  |  SPACE o W para empezar");
         } else if (gameOver) {

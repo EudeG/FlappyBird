@@ -67,7 +67,7 @@ public class Pipe {
             renderer.dibujarRect(x, yCentroSup, ANCHO, altoSup, 0.18f, 0.70f, 0.25f);
         }
 
-        // Tubería inferior — verde
+        // Tubería inferior — verde --
         float altoInf = gapBottom + 1.0f;
         if (altoInf > 0.0f) {
             float yCentroInf = -1.0f + altoInf * 0.5f;

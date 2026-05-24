@@ -40,9 +40,6 @@ public class Renderer {
 
     private void crearShaders() {
         // VERTEX SHADER
-        // Recibe cada vértice del quad base (-0.5 a 0.5)
-        // y lo transforma con escala y offset para colocarlo
-        // donde queremos en pantalla.
         String vertexSrc = """
             #version 330 core
             layout (location = 0) in vec3 aPos;
@@ -55,8 +52,6 @@ public class Renderer {
             """;
 
         // FRAGMENT SHADER
-        // Recibe el color uniforme y lo aplica a cada píxel.
-        // vec4(uColor, 1.0) = RGB del uniform + alpha 1.0 (sólido)
         String fragmentSrc = """
             #version 330 core
             uniform vec3 uColor;

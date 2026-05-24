@@ -57,17 +57,30 @@ public class Bird {
      * Retorna false si el pájaro chocó con el techo o el suelo.
      */
     public boolean actualizar(float dt) {
+
+        if (puntaje>=3){
+            y += 0.5f * dt;
+            return false;
+        }
+
         velY += GRAVEDAD * dt;
         if (velY < VELOCIDAD_MAX_CAIDA) {
             velY = VELOCIDAD_MAX_CAIDA;
         }
         y += velY * dt;
 
-        // Chocó con techo o suelo
-        if (y + ALTO * 0.5f >= 1.0f || y - ALTO * 0.5f <= -1.0f) {
+        // Chocó con techo
+
+        if ( y + ALTO * 0.5f >= 1.0f) {
             vivo = false;
             return false;
         }
+        //choco con suelo
+        if (y - ALTO * 0.5f <= -1.0f) {
+            vivo = false;
+            return false;
+        }
+
         return true;
     }
 
